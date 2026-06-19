@@ -18,7 +18,6 @@ from data_formatting.exposure_loading_utils import (
 from analysis.figure4_exposure_share_cdf import (
     RUBRIC_BASED_EXPOSURE_PATH,
     _task_id_to_str,
-    load_rubric_based_exposure_excel,
 )
 from utils.constants import HOURS_PER_DAY
 
@@ -79,30 +78,6 @@ def _build_task_rows_from_task_ratings(ratings_path: Path) -> list[dict]:
             "Mean Importance": importance,
         })
     return rows
-
-
-def _build_rubric_based_lookup(full_task_df: pd.DataFrame) -> dict[tuple[str, int], float]:
-    """(ONETSOCCode, TaskID) -> auto_hl_bi. Only includes rows with non-null TaskID, auto_hl_bi, TaskType."""
-    sub = full_task_df[["ONETSOCCode", "TaskID", "auto_hl_bi", "TaskType"]].dropna(
-        subset=["TaskID", "auto_hl_bi", "TaskType"]
-    )
-    lookup = {}
-    for _, row in sub.iterrows():
-        key = (str(row["ONETSOCCode"]), _normalize_task_id(row["TaskID"]))
-        lookup[key] = float(row["auto_hl_bi"])
-    return lookup
-
-
-def _build_rubric_based_task_type_lookup(full_task_df: pd.DataFrame) -> dict[tuple[str, int], str]:
-    """(ONETSOCCode, TaskID) -> TaskType (Core/Supplemental)."""
-    sub = full_task_df[["ONETSOCCode", "TaskID", "TaskType"]].dropna(
-        subset=["TaskID", "TaskType"]
-    )
-    lookup = {}
-    for _, row in sub.iterrows():
-        key = (str(row["ONETSOCCode"]), _normalize_task_id(row["TaskID"]))
-        lookup[key] = str(row["TaskType"])
-    return lookup
 
 
 def _build_hm_l_automation_lookups(rubric_based_path):
@@ -190,11 +165,6 @@ def main():
     assert SIMULATION_BASED_EXPOSURE_PATH.exists(), f"Simulation-based exposure file not found: {SIMULATION_BASED_EXPOSURE_PATH}"
     task_rows = _build_task_rows_from_task_ratings(TASK_RATINGS_PATH)
 
-    full_task_df = load_rubric_based_exposure_excel(
-        RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH
-    )
-    rubric_based_lookup = _build_rubric_based_lookup(full_task_df)
-    rubric_based_task_type_lookup = _build_rubric_based_task_type_lookup(full_task_df)
     hm_l_mod_high_lookup, hm_l_high_only_lookup = _build_hm_l_automation_lookups(
         RUBRIC_BASED_EXPOSURE_PATH
     )
@@ -207,7 +177,6 @@ def main():
     simulation_based_lookup_mod_high, simulation_based_lookup_high_only = _build_simulation_based_regime_lookups(
         simulation_based_df, EXPOSURE_COL
     )
-    simulation_based_task_type_lookup = _build_rubric_based_task_type_lookup(simulation_based_df)
     simulation_based_task_keys = set(simulation_based_raw_lookup.keys())
     assert len(simulation_based_task_keys) > 0, "No Simulation-based task keys remain after filtering."
     simulation_based_occupation_codes = {occ for occ, _ in simulation_based_task_keys}
