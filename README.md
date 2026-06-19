@@ -65,7 +65,6 @@ data/
 ├── onet_data/               O*NET Task Ratings / Task Statements workbooks
 ├── crosswalks/              Census/SOC/O*NET crosswalks
 ├── cps_data/                CPS ASEC extract (per-SOC hours constants)
-├── wage_data/               OEWS wage/employment workbook
 ├── exposure_scores/         simulation_based_exposure.xlsx, rubric_based_exposure.xlsx
 ├── anthropic_index_data/    Tamkin & McCrory per-task time data
 └── generated_data/          LM pairwise-ranking cache + per-occupation LP outputs + soc-code list
