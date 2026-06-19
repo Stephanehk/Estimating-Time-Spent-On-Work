@@ -4,9 +4,10 @@ import re
 
 
 def get_anthropic_task_time_mapping():
-    # See documentation here:
+    # Anthropic Economic Index, pre-filtered to the one facet this code uses
+    # (onet_task::human_only_time) to keep the shipped file small; the full raw release is at
     # https://huggingface.co/datasets/Anthropic/EconomicIndex/blob/main/release_2026_01_15/data_documentation.md
-    df = pd.read_csv("data/anthropic_index_data/aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv")
+    df = pd.read_csv("data/anthropic_index_data/aei_onet_task_human_only_time_2025-11-13_to_2025-11-20.csv")
 
     # Extract onet_task::human_only_time (global only) and build a task->time mapping.
     facet_df = df[df["facet"] == "onet_task::human_only_time"]
