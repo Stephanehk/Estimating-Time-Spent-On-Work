@@ -1,16 +1,16 @@
 """
 Load exposure scores from either:
-  - data/simulation_exposure/task_scores.xlsx, loaded through
+  - data/exposure_scores/simulation_based_exposure.xlsx, loaded through
     data_formatting.exposure_loading_utils and mapped to O*NET-SOC code
     and task ID via Task Ratings; TaskType from Task Statements.
-  - replicate_hosseini_estimates/replicated_task_dataset.xlsx (ONETSOCCode, TaskID, auto_hl_bi;
+  - data/exposure_scores/rubric_based_exposure.xlsx (ONETSOCCode, TaskID, auto_hl_bi;
     TaskType from file or Task Statements).
 
 For each occupation with generated time-per-task JSON, require the exposure table and
 occupation_result["Time per task"] to have the exact same set of task codes (no intersection
 fallback). Compute task-weighted and time-weighted exposure shares.
 
-Website JSON (occupation_data2saveforwebsite) is updated only when using the Hosseini replicated exposure file.
+Website JSON (occupation_data2saveforwebsite) is updated only when using the rubric-based exposure file.
 """
 import json
 import argparse
@@ -25,15 +25,15 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from data_formatting.exposure_loading_utils import (
-    ALEX_EXPOSURE_PATH,
+    SIMULATION_BASED_EXPOSURE_PATH,
     EXPOSURE_COL,
     TASK_RATINGS_PATH,
     TASK_STATEMENTS_PATH,
     _load_task_type_lookup,
-    load_alex_exposure_mapped_to_ratings,
+    load_simulation_based_exposure_mapped_to_ratings,
 )
 
-REPLICATED_EXPOSURE_PATH = Path("replicate_hosseini_estimates/replicated_task_dataset.xlsx")
+RUBRIC_BASED_EXPOSURE_PATH = Path("data/exposure_scores/rubric_based_exposure.xlsx")
 
 
 def _task_id_to_str(t):
@@ -54,9 +54,9 @@ def _normalize_auto_hl_bi(val):
     return 1 if int(round(float(val))) == 1 else 0
 
 
-def load_replicated_exposure_excel(replicated_path, statements_path, exposed_tiers=None):
+def load_rubric_based_exposure_excel(rubric_based_path, statements_path, exposed_tiers=None):
     """
-    Load replicate_hosseini_estimates/replicated_task_dataset.xlsx.
+    Load data/exposure_scores/rubric_based_exposure.xlsx.
     Requires ONETSOCCode, TaskID, auto_hl_bi, automation_hl. Uses TaskType column if present;
     otherwise Task Statements.
 
@@ -67,8 +67,8 @@ def load_replicated_exposure_excel(replicated_path, statements_path, exposed_tie
 
     Returns DataFrame with ONETSOCCode, TaskID, auto_hl_bi (0/1), TaskType. One row per (SOC, TaskID).
     """
-    assert replicated_path.exists(), f"Replicated exposure file not found: {replicated_path}"
-    df = pd.read_excel(replicated_path)
+    assert rubric_based_path.exists(), f"Rubric-based exposure file not found: {rubric_based_path}"
+    df = pd.read_excel(rubric_based_path)
     assert "ONETSOCCode" in df.columns and "TaskID" in df.columns and "auto_hl_bi" in df.columns
 
     valid_tiers = {"T0", "T1", "T2", "T3", "T4"}
@@ -105,7 +105,7 @@ def load_replicated_exposure_excel(replicated_path, statements_path, exposed_tie
             "TaskType": task_type,
         })
     out = pd.DataFrame(rows)
-    assert len(out) > 0, "No rows loaded from replicated_task_dataset.xlsx"
+    assert len(out) > 0, "No rows loaded from rubric_based_exposure.xlsx"
     out = out.drop_duplicates(subset=["ONETSOCCode", "TaskID"], keep="first")
     return out
 
@@ -240,7 +240,7 @@ def run_weighted_exposure_analysis(
         onet2fraction_exposed_time_weighted[onet_soc_code] = time_weighted_share
 
         if update_website_json and onet_soc_code in data2save_for_website:
-            data2save_for_website[onet_soc_code]["time_task_codes==hosseini_task_codes"] = True
+            data2save_for_website[onet_soc_code]["time_task_codes==rubric_based_task_codes"] = True
             data2save_for_website[onet_soc_code]["Time weighted exposure share"] = time_weighted_share
             data2save_for_website[onet_soc_code]["Unweighted exposure share"] = share
             data2save_for_website[onet_soc_code]["task_code2is_exposed"] = task_code2is_exposed
@@ -286,8 +286,8 @@ def _ccdf_xy(values):
 
 
 def _save_combined_exposure_plots(
-    alex_result,
-    hosseini_result,
+    simulation_based_result,
+    rubric_based_result,
     x_axis_label,
     filename_suffix="",
 ):
@@ -316,10 +316,10 @@ def _save_combined_exposure_plots(
 
     Path("plots").mkdir(parents=True, exist_ok=True)
 
-    a_task = _values_from_fraction_dict(alex_result["onet2fraction_exposed"])
-    a_time = _values_from_fraction_dict(alex_result["onet2fraction_exposed_time_weighted"])
-    h_task = _values_from_fraction_dict(hosseini_result["onet2fraction_exposed"])
-    h_time = _values_from_fraction_dict(hosseini_result["onet2fraction_exposed_time_weighted"])
+    a_task = _values_from_fraction_dict(simulation_based_result["onet2fraction_exposed"])
+    a_time = _values_from_fraction_dict(simulation_based_result["onet2fraction_exposed_time_weighted"])
+    h_task = _values_from_fraction_dict(rubric_based_result["onet2fraction_exposed"])
+    h_time = _values_from_fraction_dict(rubric_based_result["onet2fraction_exposed_time_weighted"])
 
     assert len(a_task) > 0 and len(a_time) > 0, "Simulation-based exposure: no values to plot."
     assert len(h_task) > 0 and len(h_time) > 0, "Rubric-based exposure: no values to plot."
@@ -349,7 +349,7 @@ def _save_combined_exposure_plots(
     plt.ylabel("Occupation count")
     plt.legend(loc="upper right")
     plt.tight_layout()
-    plt.savefig(f"plots/histogram_fraction_tasks_exposed_alex_vs_hosseini{filename_suffix}.png", dpi=300)
+    plt.savefig(f"plots/histogram_fraction_tasks_exposed_simulation_based_vs_rubric_based{filename_suffix}.png", dpi=300)
     plt.close()
 
     plt.figure(figsize=(12, 7), dpi=300)
@@ -366,7 +366,7 @@ def _save_combined_exposure_plots(
     plt.ylabel("Fraction of occupations at or above")
     plt.legend(loc="upper right")
     plt.tight_layout()
-    plt.savefig(f"plots/fraction_occupations_at_or_above_fraction_tasks_exposed_alex_vs_hosseini{filename_suffix}.png", dpi=300)
+    plt.savefig(f"plots/fraction_occupations_at_or_above_fraction_tasks_exposed_simulation_based_vs_rubric_based{filename_suffix}.png", dpi=300)
     plt.close()
 
 
@@ -382,81 +382,81 @@ def main():
     # Imported inside main to avoid the module-level import cycle:
     # exposure_helpers imports from this module.
     from analysis.exposure_helpers import (
-        _alex_task_keys,
-        _restrict_hosseini_to_alex_task_universe,
+        _simulation_based_task_keys,
+        _restrict_rubric_based_to_simulation_based_task_universe,
     )
 
-    exposure_alex, _ = load_alex_exposure_mapped_to_ratings(
-        ALEX_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH
+    exposure_simulation_based, _ = load_simulation_based_exposure_mapped_to_ratings(
+        SIMULATION_BASED_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH
     )
-    alex_task_universe = _alex_task_keys(exposure_alex)
-    result_alex = run_weighted_exposure_analysis(
-        exposure_alex,
+    simulation_based_task_universe = _simulation_based_task_keys(exposure_simulation_based)
+    result_simulation_based = run_weighted_exposure_analysis(
+        exposure_simulation_based,
         extra_details,
-        source_label="alex",
+        source_label="simulation_based",
         update_website_json=False,
     )
 
-    exposure_replicated = load_replicated_exposure_excel(
-        REPLICATED_EXPOSURE_PATH, TASK_STATEMENTS_PATH
+    exposure_rubric_based = load_rubric_based_exposure_excel(
+        RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH
     )
-    exposure_replicated = _restrict_hosseini_to_alex_task_universe(
-        exposure_replicated, alex_task_universe
+    exposure_rubric_based = _restrict_rubric_based_to_simulation_based_task_universe(
+        exposure_rubric_based, simulation_based_task_universe
     )
-    result_hosseini = run_weighted_exposure_analysis(
-        exposure_replicated,
+    result_rubric_based = run_weighted_exposure_analysis(
+        exposure_rubric_based,
         extra_details,
-        source_label="replicated_hosseini",
+        source_label="rubric_based",
         update_website_json=False,
     )
 
     _save_combined_exposure_plots(
-        result_alex,
-        result_hosseini,
+        result_simulation_based,
+        result_rubric_based,
         x_axis_label="Share of highly exposed tasks",
     )
-    print("Saved combined plots: plots/histogram_fraction_tasks_exposed_alex_vs_hosseini.png")
-    print("Saved combined plots: plots/fraction_occupations_at_or_above_fraction_tasks_exposed_alex_vs_hosseini.png")
+    print("Saved combined plots: plots/histogram_fraction_tasks_exposed_simulation_based_vs_rubric_based.png")
+    print("Saved combined plots: plots/fraction_occupations_at_or_above_fraction_tasks_exposed_simulation_based_vs_rubric_based.png")
 
     # Moderate-exposure variant: a task counts as exposed if its exposure > 25%.
-    # Alex uses raw_time_savings_median >= 0.25. Hosseini uses tier >= T2 (T2 is the
+    # Simulation-based uses raw_time_savings_median >= 0.25. Rubric-based uses tier >= T2 (T2 is the
     # first tier whose entire range, 50-80%, lies above 25%).
-    exposure_alex_mod, _ = load_alex_exposure_mapped_to_ratings(
-        ALEX_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH, exposure_threshold=0.25
+    exposure_simulation_based_mod, _ = load_simulation_based_exposure_mapped_to_ratings(
+        SIMULATION_BASED_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH, exposure_threshold=0.25
     )
-    assert _alex_task_keys(exposure_alex_mod) == alex_task_universe, (
-        "Alex retained task universe changed when threshold dropped to 0.25"
+    assert _simulation_based_task_keys(exposure_simulation_based_mod) == simulation_based_task_universe, (
+        "Simulation-based retained task universe changed when threshold dropped to 0.25"
     )
-    result_alex_mod = run_weighted_exposure_analysis(
-        exposure_alex_mod,
+    result_simulation_based_mod = run_weighted_exposure_analysis(
+        exposure_simulation_based_mod,
         extra_details,
-        source_label="alex_moderate",
+        source_label="simulation_based_moderate",
         update_website_json=False,
         quiet=True,
     )
 
-    exposure_replicated_mod = load_replicated_exposure_excel(
-        REPLICATED_EXPOSURE_PATH, TASK_STATEMENTS_PATH, exposed_tiers={"T2", "T3", "T4"}
+    exposure_rubric_based_mod = load_rubric_based_exposure_excel(
+        RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH, exposed_tiers={"T2", "T3", "T4"}
     )
-    exposure_replicated_mod = _restrict_hosseini_to_alex_task_universe(
-        exposure_replicated_mod, alex_task_universe
+    exposure_rubric_based_mod = _restrict_rubric_based_to_simulation_based_task_universe(
+        exposure_rubric_based_mod, simulation_based_task_universe
     )
-    result_hosseini_mod = run_weighted_exposure_analysis(
-        exposure_replicated_mod,
+    result_rubric_based_mod = run_weighted_exposure_analysis(
+        exposure_rubric_based_mod,
         extra_details,
-        source_label="replicated_hosseini_moderate",
+        source_label="rubric_based_moderate",
         update_website_json=False,
         quiet=True,
     )
 
     _save_combined_exposure_plots(
-        result_alex_mod,
-        result_hosseini_mod,
+        result_simulation_based_mod,
+        result_rubric_based_mod,
         x_axis_label="Share of moderately exposed tasks",
         filename_suffix="_moderate_exposure",
     )
-    print("Saved moderate-exposure plots: plots/histogram_fraction_tasks_exposed_alex_vs_hosseini_moderate_exposure.png")
-    print("Saved moderate-exposure plots: plots/fraction_occupations_at_or_above_fraction_tasks_exposed_alex_vs_hosseini_moderate_exposure.png")
+    print("Saved moderate-exposure plots: plots/histogram_fraction_tasks_exposed_simulation_based_vs_rubric_based_moderate_exposure.png")
+    print("Saved moderate-exposure plots: plots/fraction_occupations_at_or_above_fraction_tasks_exposed_simulation_based_vs_rubric_based_moderate_exposure.png")
 
 
 if __name__ == "__main__":

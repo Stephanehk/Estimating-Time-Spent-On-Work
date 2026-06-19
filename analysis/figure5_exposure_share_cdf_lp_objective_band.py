@@ -1,6 +1,6 @@
 """
 Same as analysis/figure4_exposure_share_cdf.py, except that for each
-exposure source (Alex simulation and Hosseini-replicated rubric) we load
+exposure source (Simulation-based simulation and rubric-based rubric) we load
 occupation-level results under BOTH use_max_span_time_weights=True and =False, and
 shade the area between the two time-weighted curves on the histogram and CCDF plots.
 
@@ -19,16 +19,16 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from data_formatting.exposure_loading_utils import (
-    ALEX_EXPOSURE_PATH,
+    SIMULATION_BASED_EXPOSURE_PATH,
     TASK_RATINGS_PATH,
     TASK_STATEMENTS_PATH,
-    load_alex_exposure_mapped_to_ratings,
+    load_simulation_based_exposure_mapped_to_ratings,
 )
 from analysis.figure4_exposure_share_cdf import (
-    REPLICATED_EXPOSURE_PATH,
+    RUBRIC_BASED_EXPOSURE_PATH,
     _ccdf_xy,
     _values_from_fraction_dict,
-    load_replicated_exposure_excel,
+    load_rubric_based_exposure_excel,
     run_weighted_exposure_analysis,
 )
 
@@ -55,10 +55,10 @@ def _step_survival_eval(sorted_x, survival, x_grid):
 
 
 def _save_max_span_band_plots(
-    alex_result_true,
-    alex_result_false,
-    hosseini_result_true,
-    hosseini_result_false,
+    simulation_based_result_true,
+    simulation_based_result_false,
+    rubric_based_result_true,
+    rubric_based_result_false,
     x_axis_label,
     filename_suffix="",
 ):
@@ -81,12 +81,12 @@ def _save_max_span_band_plots(
 
     Path("plots").mkdir(parents=True, exist_ok=True)
 
-    a_task = _values_from_fraction_dict(alex_result_true["onet2fraction_exposed"])
-    h_task = _values_from_fraction_dict(hosseini_result_true["onet2fraction_exposed"])
-    a_time_t = _values_from_fraction_dict(alex_result_true["onet2fraction_exposed_time_weighted"])
-    a_time_f = _values_from_fraction_dict(alex_result_false["onet2fraction_exposed_time_weighted"])
-    h_time_t = _values_from_fraction_dict(hosseini_result_true["onet2fraction_exposed_time_weighted"])
-    h_time_f = _values_from_fraction_dict(hosseini_result_false["onet2fraction_exposed_time_weighted"])
+    a_task = _values_from_fraction_dict(simulation_based_result_true["onet2fraction_exposed"])
+    h_task = _values_from_fraction_dict(rubric_based_result_true["onet2fraction_exposed"])
+    a_time_t = _values_from_fraction_dict(simulation_based_result_true["onet2fraction_exposed_time_weighted"])
+    a_time_f = _values_from_fraction_dict(simulation_based_result_false["onet2fraction_exposed_time_weighted"])
+    h_time_t = _values_from_fraction_dict(rubric_based_result_true["onet2fraction_exposed_time_weighted"])
+    h_time_f = _values_from_fraction_dict(rubric_based_result_false["onet2fraction_exposed_time_weighted"])
 
     assert len(a_task) > 0 and len(h_task) > 0, "Task-weighted exposure: no values to plot."
     assert len(a_time_t) > 0 and len(a_time_f) > 0, "Simulation time-weighted: no values to plot."
@@ -147,7 +147,7 @@ def _save_max_span_band_plots(
     plt.legend(loc="upper right")
     plt.tight_layout()
     plt.savefig(
-        f"plots/histogram_fraction_tasks_exposed_alex_vs_hosseini_max_span_band{filename_suffix}.png",
+        f"plots/histogram_fraction_tasks_exposed_simulation_based_vs_rubric_based_max_span_band{filename_suffix}.png",
         dpi=300,
     )
     plt.close()
@@ -163,21 +163,21 @@ def _save_max_span_band_plots(
     plt.step(sa, fa, where="post", color=sim_dark, linestyle="-", linewidth=3.0, label=sim_task_label)
     plt.step(sh, fh, where="post", color=rub_dark, linestyle="-", linewidth=3.0, label=rub_task_label)
 
-    common_x_alex = np.linspace(
+    common_x_simulation_based = np.linspace(
         float(min(sta_t[0], sta_f[0])), float(max(sta_t[-1], sta_f[-1])), 1000
     )
     common_x_hos = np.linspace(
         float(min(sth_t[0], sth_f[0])), float(max(sth_t[-1], sth_f[-1])), 1000
     )
-    alex_t_eval = _step_survival_eval(sta_t, fta_t, common_x_alex)
-    alex_f_eval = _step_survival_eval(sta_f, fta_f, common_x_alex)
+    simulation_based_t_eval = _step_survival_eval(sta_t, fta_t, common_x_simulation_based)
+    simulation_based_f_eval = _step_survival_eval(sta_f, fta_f, common_x_simulation_based)
     hos_t_eval = _step_survival_eval(sth_t, fth_t, common_x_hos)
     hos_f_eval = _step_survival_eval(sth_f, fth_f, common_x_hos)
 
     plt.fill_between(
-        common_x_alex,
-        np.minimum(alex_t_eval, alex_f_eval),
-        np.maximum(alex_t_eval, alex_f_eval),
+        common_x_simulation_based,
+        np.minimum(simulation_based_t_eval, simulation_based_f_eval),
+        np.maximum(simulation_based_t_eval, simulation_based_f_eval),
         color=sim_mid,
         alpha=0.3,
     )
@@ -199,7 +199,7 @@ def _save_max_span_band_plots(
     plt.legend(loc="upper right")
     plt.tight_layout()
     plt.savefig(
-        f"plots/fraction_occupations_at_or_above_fraction_tasks_exposed_alex_vs_hosseini_max_span_band{filename_suffix}.png",
+        f"plots/fraction_occupations_at_or_above_fraction_tasks_exposed_simulation_based_vs_rubric_based_max_span_band{filename_suffix}.png",
         dpi=300,
     )
     plt.close()
@@ -210,128 +210,128 @@ def main():
     extra_details = f"gpt-5.2_ONET_{ONET_VERSION}_use_cps_constants_prob_thresh=0.7"
 
     from analysis.exposure_helpers import (
-        _alex_task_keys,
-        _restrict_hosseini_to_alex_task_universe,
+        _simulation_based_task_keys,
+        _restrict_rubric_based_to_simulation_based_task_universe,
     )
 
-    exposure_alex, _ = load_alex_exposure_mapped_to_ratings(
-        ALEX_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH
+    exposure_simulation_based, _ = load_simulation_based_exposure_mapped_to_ratings(
+        SIMULATION_BASED_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH
     )
-    alex_task_universe = _alex_task_keys(exposure_alex)
+    simulation_based_task_universe = _simulation_based_task_keys(exposure_simulation_based)
 
-    result_alex_true = run_weighted_exposure_analysis(
-        exposure_alex,
+    result_simulation_based_true = run_weighted_exposure_analysis(
+        exposure_simulation_based,
         extra_details,
-        source_label="alex_max_span_true",
+        source_label="simulation_based_max_span_true",
         update_website_json=False,
         use_max_span_time_weights=True,
     )
-    result_alex_false = run_weighted_exposure_analysis(
-        exposure_alex,
+    result_simulation_based_false = run_weighted_exposure_analysis(
+        exposure_simulation_based,
         extra_details,
-        source_label="alex_max_span_false",
+        source_label="simulation_based_max_span_false",
         update_website_json=False,
         use_max_span_time_weights=False,
     )
 
-    exposure_replicated = load_replicated_exposure_excel(
-        REPLICATED_EXPOSURE_PATH, TASK_STATEMENTS_PATH
+    exposure_rubric_based = load_rubric_based_exposure_excel(
+        RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH
     )
-    exposure_replicated = _restrict_hosseini_to_alex_task_universe(
-        exposure_replicated, alex_task_universe
+    exposure_rubric_based = _restrict_rubric_based_to_simulation_based_task_universe(
+        exposure_rubric_based, simulation_based_task_universe
     )
-    result_hosseini_true = run_weighted_exposure_analysis(
-        exposure_replicated,
+    result_rubric_based_true = run_weighted_exposure_analysis(
+        exposure_rubric_based,
         extra_details,
-        source_label="replicated_hosseini_max_span_true",
+        source_label="rubric_based_max_span_true",
         update_website_json=False,
         use_max_span_time_weights=True,
     )
-    result_hosseini_false = run_weighted_exposure_analysis(
-        exposure_replicated,
+    result_rubric_based_false = run_weighted_exposure_analysis(
+        exposure_rubric_based,
         extra_details,
-        source_label="replicated_hosseini_max_span_false",
+        source_label="rubric_based_max_span_false",
         update_website_json=False,
         use_max_span_time_weights=False,
     )
 
     _save_max_span_band_plots(
-        result_alex_true,
-        result_alex_false,
-        result_hosseini_true,
-        result_hosseini_false,
+        result_simulation_based_true,
+        result_simulation_based_false,
+        result_rubric_based_true,
+        result_rubric_based_false,
         x_axis_label="Share of highly exposed tasks",
     )
     print(
         "Saved max-span band plots: "
-        "plots/histogram_fraction_tasks_exposed_alex_vs_hosseini_max_span_band.png"
+        "plots/histogram_fraction_tasks_exposed_simulation_based_vs_rubric_based_max_span_band.png"
     )
     print(
         "Saved max-span band plots: "
-        "plots/fraction_occupations_at_or_above_fraction_tasks_exposed_alex_vs_hosseini_max_span_band.png"
+        "plots/fraction_occupations_at_or_above_fraction_tasks_exposed_simulation_based_vs_rubric_based_max_span_band.png"
     )
 
-    exposure_alex_mod, _ = load_alex_exposure_mapped_to_ratings(
-        ALEX_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH, exposure_threshold=0.25
+    exposure_simulation_based_mod, _ = load_simulation_based_exposure_mapped_to_ratings(
+        SIMULATION_BASED_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH, exposure_threshold=0.25
     )
-    assert _alex_task_keys(exposure_alex_mod) == alex_task_universe, (
-        "Alex retained task universe changed when threshold dropped to 0.25"
+    assert _simulation_based_task_keys(exposure_simulation_based_mod) == simulation_based_task_universe, (
+        "Simulation-based retained task universe changed when threshold dropped to 0.25"
     )
-    result_alex_mod_true = run_weighted_exposure_analysis(
-        exposure_alex_mod,
+    result_simulation_based_mod_true = run_weighted_exposure_analysis(
+        exposure_simulation_based_mod,
         extra_details,
-        source_label="alex_moderate_max_span_true",
+        source_label="simulation_based_moderate_max_span_true",
         update_website_json=False,
         quiet=True,
         use_max_span_time_weights=True,
     )
-    result_alex_mod_false = run_weighted_exposure_analysis(
-        exposure_alex_mod,
+    result_simulation_based_mod_false = run_weighted_exposure_analysis(
+        exposure_simulation_based_mod,
         extra_details,
-        source_label="alex_moderate_max_span_false",
+        source_label="simulation_based_moderate_max_span_false",
         update_website_json=False,
         quiet=True,
         use_max_span_time_weights=False,
     )
 
-    exposure_replicated_mod = load_replicated_exposure_excel(
-        REPLICATED_EXPOSURE_PATH, TASK_STATEMENTS_PATH, exposed_tiers={"T2", "T3", "T4"}
+    exposure_rubric_based_mod = load_rubric_based_exposure_excel(
+        RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH, exposed_tiers={"T2", "T3", "T4"}
     )
-    exposure_replicated_mod = _restrict_hosseini_to_alex_task_universe(
-        exposure_replicated_mod, alex_task_universe
+    exposure_rubric_based_mod = _restrict_rubric_based_to_simulation_based_task_universe(
+        exposure_rubric_based_mod, simulation_based_task_universe
     )
-    result_hosseini_mod_true = run_weighted_exposure_analysis(
-        exposure_replicated_mod,
+    result_rubric_based_mod_true = run_weighted_exposure_analysis(
+        exposure_rubric_based_mod,
         extra_details,
-        source_label="replicated_hosseini_moderate_max_span_true",
+        source_label="rubric_based_moderate_max_span_true",
         update_website_json=False,
         quiet=True,
         use_max_span_time_weights=True,
     )
-    result_hosseini_mod_false = run_weighted_exposure_analysis(
-        exposure_replicated_mod,
+    result_rubric_based_mod_false = run_weighted_exposure_analysis(
+        exposure_rubric_based_mod,
         extra_details,
-        source_label="replicated_hosseini_moderate_max_span_false",
+        source_label="rubric_based_moderate_max_span_false",
         update_website_json=False,
         quiet=True,
         use_max_span_time_weights=False,
     )
 
     _save_max_span_band_plots(
-        result_alex_mod_true,
-        result_alex_mod_false,
-        result_hosseini_mod_true,
-        result_hosseini_mod_false,
+        result_simulation_based_mod_true,
+        result_simulation_based_mod_false,
+        result_rubric_based_mod_true,
+        result_rubric_based_mod_false,
         x_axis_label="Share of moderately exposed tasks",
         filename_suffix="_moderate_exposure",
     )
     print(
         "Saved moderate-exposure max-span band plots: "
-        "plots/histogram_fraction_tasks_exposed_alex_vs_hosseini_max_span_band_moderate_exposure.png"
+        "plots/histogram_fraction_tasks_exposed_simulation_based_vs_rubric_based_max_span_band_moderate_exposure.png"
     )
     print(
         "Saved moderate-exposure max-span band plots: "
-        "plots/fraction_occupations_at_or_above_fraction_tasks_exposed_alex_vs_hosseini_max_span_band_moderate_exposure.png"
+        "plots/fraction_occupations_at_or_above_fraction_tasks_exposed_simulation_based_vs_rubric_based_max_span_band_moderate_exposure.png"
     )
 
 

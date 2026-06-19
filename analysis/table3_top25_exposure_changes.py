@@ -1,7 +1,7 @@
 """
 Concise summary: how many occupations enter/exit the top-N (and bottom-N) when
 switching from task-category weighting to max-span time weighting, across the
-four exposure spec combinations (Alex vs Hosseini, high vs moderate+high).
+four exposure spec combinations (Simulation-based vs Rubric-based, high vs moderate+high).
 
 Reports only set-level changes (ignoring within-top order), for N in {25, 50}.
 """
@@ -13,26 +13,26 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from data_formatting.exposure_loading_utils import (
-    ALEX_EXPOSURE_PATH,
+    SIMULATION_BASED_EXPOSURE_PATH,
     TASK_RATINGS_PATH,
     TASK_STATEMENTS_PATH,
-    load_alex_exposure_mapped_to_ratings,
+    load_simulation_based_exposure_mapped_to_ratings,
 )
 from analysis.figure4_exposure_share_cdf import (
-    REPLICATED_EXPOSURE_PATH,
-    load_replicated_exposure_excel,
+    RUBRIC_BASED_EXPOSURE_PATH,
+    load_rubric_based_exposure_excel,
     run_weighted_exposure_analysis,
 )
 from analysis.exposure_helpers import (
-    _alex_task_keys,
-    _restrict_hosseini_to_alex_task_universe,
-    load_hosseini_exposure_t2_t3_t4,
+    _simulation_based_task_keys,
+    _restrict_rubric_based_to_simulation_based_task_universe,
+    load_rubric_based_exposure_t2_t3_t4,
 )
 
 
 EXTRA_DETAILS = "gpt-5.2_ONET_30.2_use_cps_constants_prob_thresh=0.7"
-ALEX_THRESHOLD_HIGH = 0.5
-ALEX_THRESHOLD_MODERATE_PLUS_HIGH = 0.25
+SIMULATION_BASED_THRESHOLD_HIGH = 0.5
+SIMULATION_BASED_THRESHOLD_MODERATE_PLUS_HIGH = 0.25
 GENERATED_DATA_DIR = _REPO_ROOT / "data" / "generated_data"
 N_VALUES = (25, 50)
 
@@ -73,26 +73,26 @@ def _summary(label, d_task, d_time):
 
 
 def main():
-    exposure_alex_high, _ = load_alex_exposure_mapped_to_ratings(
-        ALEX_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH,
-        exposure_threshold=ALEX_THRESHOLD_HIGH,
+    exposure_simulation_based_high, _ = load_simulation_based_exposure_mapped_to_ratings(
+        SIMULATION_BASED_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH,
+        exposure_threshold=SIMULATION_BASED_THRESHOLD_HIGH,
     )
-    alex_task_universe = _alex_task_keys(exposure_alex_high)
-    exposure_alex_mod, _ = load_alex_exposure_mapped_to_ratings(
-        ALEX_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH,
-        exposure_threshold=ALEX_THRESHOLD_MODERATE_PLUS_HIGH,
+    simulation_based_task_universe = _simulation_based_task_keys(exposure_simulation_based_high)
+    exposure_simulation_based_mod, _ = load_simulation_based_exposure_mapped_to_ratings(
+        SIMULATION_BASED_EXPOSURE_PATH, TASK_RATINGS_PATH, TASK_STATEMENTS_PATH,
+        exposure_threshold=SIMULATION_BASED_THRESHOLD_MODERATE_PLUS_HIGH,
     )
-    assert _alex_task_keys(exposure_alex_mod) == alex_task_universe
+    assert _simulation_based_task_keys(exposure_simulation_based_mod) == simulation_based_task_universe
 
-    exposure_h_high = load_replicated_exposure_excel(REPLICATED_EXPOSURE_PATH, TASK_STATEMENTS_PATH)
-    exposure_h_high = _restrict_hosseini_to_alex_task_universe(exposure_h_high, alex_task_universe)
-    exposure_h_mod = load_hosseini_exposure_t2_t3_t4(REPLICATED_EXPOSURE_PATH, TASK_STATEMENTS_PATH)
-    exposure_h_mod = _restrict_hosseini_to_alex_task_universe(exposure_h_mod, alex_task_universe)
+    exposure_h_high = load_rubric_based_exposure_excel(RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH)
+    exposure_h_high = _restrict_rubric_based_to_simulation_based_task_universe(exposure_h_high, simulation_based_task_universe)
+    exposure_h_mod = load_rubric_based_exposure_t2_t3_t4(RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH)
+    exposure_h_mod = _restrict_rubric_based_to_simulation_based_task_universe(exposure_h_mod, simulation_based_task_universe)
 
     res = {}
     for key, exp_df, src in [
-        ("alex_high", exposure_alex_high, "alex_high"),
-        ("alex_mod", exposure_alex_mod, "alex_mod"),
+        ("simulation_based_high", exposure_simulation_based_high, "simulation_based_high"),
+        ("simulation_based_mod", exposure_simulation_based_mod, "simulation_based_mod"),
         ("h_high", exposure_h_high, "h_high"),
         ("h_mod", exposure_h_mod, "h_mod"),
     ]:
@@ -102,22 +102,22 @@ def main():
         )
 
     _summary(
-        "Alex (simulation), high only (threshold 0.5)",
-        res["alex_high"]["onet2fraction_exposed"],
-        res["alex_high"]["onet2fraction_exposed_time_weighted"],
+        "Simulation-based, high only (threshold 0.5)",
+        res["simulation_based_high"]["onet2fraction_exposed"],
+        res["simulation_based_high"]["onet2fraction_exposed_time_weighted"],
     )
     _summary(
-        "Alex (simulation), moderate+high (threshold 0.25)",
-        res["alex_mod"]["onet2fraction_exposed"],
-        res["alex_mod"]["onet2fraction_exposed_time_weighted"],
+        "Simulation-based, moderate+high (threshold 0.25)",
+        res["simulation_based_mod"]["onet2fraction_exposed"],
+        res["simulation_based_mod"]["onet2fraction_exposed_time_weighted"],
     )
     _summary(
-        "Hosseini (rubric), high only (T3+T4)",
+        "Rubric-based, high only (T3+T4)",
         res["h_high"]["onet2fraction_exposed"],
         res["h_high"]["onet2fraction_exposed_time_weighted"],
     )
     _summary(
-        "Hosseini (rubric), moderate+high (T2+T3+T4)",
+        "Rubric-based, moderate+high (T2+T3+T4)",
         res["h_mod"]["onet2fraction_exposed"],
         res["h_mod"]["onet2fraction_exposed_time_weighted"],
     )

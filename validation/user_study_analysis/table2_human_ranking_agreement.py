@@ -17,7 +17,7 @@ same threshold rule as time_classification).
 
 Beam JSON matches get_time_preference_with_probability_for_pairs /
 find_time_per_task.find_satisfying_weights (gpt-5.2, n_trials=1, beam 1000, prob 0.7,
-per_day=False, cache_details_suffix _ONET_30.2). Task ids come from user_study/data/onet2task.json.
+per_day=False, cache_details_suffix _ONET_30.2). Task ids come from the co-located onet2task.json.
 
 Twin pairs: mainStepId ending in _reversed paired with the id without that suffix.
 Consistency: preference_verdict(taskIdsPresented, selectedAnswer) matches on both
@@ -966,7 +966,7 @@ def parse_args():
         default=DEFAULT_USER_STUDY_ONET_SOC_CODE,
         metavar="SOC",
         help=(
-            "O*NET-SOC code for the study occupation (key in user_study/data/onet2task.json; "
+            "O*NET-SOC code for the study occupation (key in the co-located onet2task.json; "
             "also selects beam cache and occupation_time_per_task_<SOC>..._chosen.json). "
             f"Default: {DEFAULT_USER_STUDY_ONET_SOC_CODE}."
         ),

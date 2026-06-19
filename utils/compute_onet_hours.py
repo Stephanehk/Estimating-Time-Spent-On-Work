@@ -14,7 +14,7 @@ estimates for occupations that have their own dedicated Census OCC code with CPS
 The single public entrypoint is `compute_soc_constants(soc_code)`, which returns a dict with
 a per-SOC FREQ_TO_TIME_PER_DAY mapping (and DAYS_PER_YEAR / HOURS_WORKED_PER_YEAR), falling
 back to the global defaults when CPS data is unavailable for the occupation. Reads:
-    data/cps_asec.csv, data/2018-occupation-code-list-and-crosswalk.xlsx, data/2019_to_SOC_Crosswalk.xlsx
+    data/cps_data/cps_asec.csv, data/crosswalks/2018-occupation-code-list-and-crosswalk.xlsx, data/crosswalks/2019_to_SOC_Crosswalk.xlsx
 """
 from __future__ import annotations
 
@@ -414,9 +414,9 @@ def compute_estimates(
 
 @lru_cache(maxsize=1)
 def _all_soc_estimates() -> pd.DataFrame:
-    cps_path = Path("data/cps_asec.csv")
-    census_path = Path("data/2018-occupation-code-list-and-crosswalk.xlsx")
-    onet_path = Path("data/2019_to_SOC_Crosswalk.xlsx")
+    cps_path = Path("data/cps_data/cps_asec.csv")
+    census_path = Path("data/crosswalks/2018-occupation-code-list-and-crosswalk.xlsx")
+    onet_path = Path("data/crosswalks/2019_to_SOC_Crosswalk.xlsx")
 
     cps = load_cps(cps_path)
     soc_to_onet = load_soc_to_onet(onet_path)

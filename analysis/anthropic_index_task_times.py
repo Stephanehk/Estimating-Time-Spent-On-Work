@@ -6,7 +6,7 @@ import re
 def get_anthropic_task_time_mapping():
     # See documentation here:
     # https://huggingface.co/datasets/Anthropic/EconomicIndex/blob/main/release_2026_01_15/data_documentation.md
-    df = pd.read_csv("data/Anthropic_Index/aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv")
+    df = pd.read_csv("data/anthropic_index_data/aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv")
 
     # Extract onet_task::human_only_time (global only) and build a task->time mapping.
     facet_df = df[df["facet"] == "onet_task::human_only_time"]
@@ -59,7 +59,7 @@ def get_anthropic_task_time_mapping():
 
 
     # Map tasks to O*NET-SOC occupation codes via Task Statements.xlsx
-    task_statements = pd.read_excel("data/Task Statements.xlsx")
+    task_statements = pd.read_excel("data/onet_data/Task Statements.xlsx")
     task_statements["task_norm"] = task_statements["Task"].apply(normalize_task_text)
     task_time_mapping["task_norm"] = task_time_mapping["task"].apply(normalize_task_text)
 

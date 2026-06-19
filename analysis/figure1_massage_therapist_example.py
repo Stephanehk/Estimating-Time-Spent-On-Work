@@ -1,7 +1,7 @@
 """Reproduce the numbers behind Figure 1 (Massage Therapists, O*NET 31-9011.00).
 
 Figure 1 contrasts two exposure verdicts for the same task list under the rubric-based
-(Hosseini-replicated) exposure measure at the moderate+high tier (automation_hl in
+(rubric-based) exposure measure at the moderate+high tier (automation_hl in
 {T2, T3, T4}):
   - core/supplemental task-type weighting  -> 44% of tasks exposed
   - our time-share weighting s(t, o)        -> 16% of working time exposed
@@ -25,9 +25,9 @@ if str(_REPO_ROOT) not in sys.path:
 
 from data_formatting.exposure_loading_utils import TASK_STATEMENTS_PATH
 from analysis.figure4_exposure_share_cdf import (
-    REPLICATED_EXPOSURE_PATH,
+    RUBRIC_BASED_EXPOSURE_PATH,
     _task_id_to_str,
-    load_replicated_exposure_excel,
+    load_rubric_based_exposure_excel,
     run_weighted_exposure_analysis,
 )
 
@@ -39,14 +39,14 @@ EXPOSED_TIERS = {"T2", "T3", "T4"}
 
 
 def main():
-    exposure_df = load_replicated_exposure_excel(
-        REPLICATED_EXPOSURE_PATH, TASK_STATEMENTS_PATH, exposed_tiers=EXPOSED_TIERS
+    exposure_df = load_rubric_based_exposure_excel(
+        RUBRIC_BASED_EXPOSURE_PATH, TASK_STATEMENTS_PATH, exposed_tiers=EXPOSED_TIERS
     )
 
     result = run_weighted_exposure_analysis(
         exposure_df,
         extra_details=EXTRA_DETAILS,
-        source_label="hosseini_replicated_moderate_plus_high",
+        source_label="rubric_based_rubric_based_moderate_plus_high",
         update_website_json=False,
         quiet=True,
         use_max_span_time_weights=True,

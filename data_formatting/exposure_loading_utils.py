@@ -1,9 +1,9 @@
 """
-Shared loading utilities for Alex Wan's task-level exposure data.
+Shared loading utilities for Simulation-based's task-level exposure data.
 
-These helpers are the single place where Alex's exposure spreadsheet is mapped
+These helpers are the single place where the simulation-based exposure spreadsheet is mapped
 onto O*NET task ratings. They assume:
-- the Alex file has one row per occupation/task text pair;
+- the Simulation-based file has one row per occupation/task text pair;
 - exposure scores live in raw_time_savings_median;
 - a score is usable only when synthetic_generation_success and
   exposure_prediction_success are TRUE;
@@ -17,9 +17,9 @@ import numpy as np
 import pandas as pd
 
 
-ALEX_EXPOSURE_PATH = Path("data/simulation_exposure/task_scores.xlsx")
-TASK_RATINGS_PATH = Path("data/Task Ratings.xlsx")
-TASK_STATEMENTS_PATH = Path("data/Task Statements.xlsx")
+SIMULATION_BASED_EXPOSURE_PATH = Path("data/exposure_scores/simulation_based_exposure.xlsx")
+TASK_RATINGS_PATH = Path("data/onet_data/Task Ratings.xlsx")
+TASK_STATEMENTS_PATH = Path("data/onet_data/Task Statements.xlsx")
 
 EXPOSURE_COL = "raw_time_savings_median"
 SYNTHETIC_SUCCESS_COL = "synthetic_generation_success"
@@ -57,7 +57,7 @@ def _build_ratings_task_counts(ratings_path):
     """
     Build ONETSOCCode -> number of distinct tasks in Task Ratings.
 
-    Assumes Task Ratings is the denominator for occupation-level Alex coverage.
+    Assumes Task Ratings is the denominator for occupation-level Simulation-based coverage.
     """
     ratings_path = Path(ratings_path)
     assert ratings_path.exists(), f"Task Ratings not found: {ratings_path}"
@@ -116,7 +116,7 @@ def _normalize_success_flag(value):
 
 def _is_usable_exposure_row(row):
     """
-    Return whether an Alex row has a usable exposure score.
+    Return whether an Simulation-based row has a usable exposure score.
 
     Assumes score usability requires both success flags to be TRUE and a non-null
     raw_time_savings_median value.
@@ -129,18 +129,18 @@ def _is_usable_exposure_row(row):
     )
 
 
-def load_alex_exposure_mapped_to_ratings(
-    alex_path,
+def load_simulation_based_exposure_mapped_to_ratings(
+    simulation_based_path,
     ratings_path,
     statements_path,
     exposure_threshold=0.5,
     min_occupation_coverage=MIN_OCCUPATION_EXPOSURE_COVERAGE,
 ):
     """
-    Load Alex exposure scores and map them to O*NET task ratings.
+    Load Simulation-based exposure scores and map them to O*NET task ratings.
 
     Assumptions:
-    - alex_path has Title, Task, raw_time_savings_median,
+    - simulation_based_path has Title, Task, raw_time_savings_median,
       synthetic_generation_success, and exposure_prediction_success.
     - raw_time_savings_median is the exposure score to threshold.
     - rows with either success flag not TRUE have no exposure score.
@@ -150,15 +150,15 @@ def load_alex_exposure_mapped_to_ratings(
     Returns (DataFrame, n_occupations_not_all_tasks_in_ratings), where DataFrame
     has ONETSOCCode, TaskID, auto_hl_bi, TaskType, and raw_time_savings_median.
     """
-    alex_path = Path(alex_path)
+    simulation_based_path = Path(simulation_based_path)
     assert 0.0 <= exposure_threshold <= 1.0, (
         f"exposure_threshold must be in [0, 1], got {exposure_threshold}"
     )
     assert 0.0 < min_occupation_coverage <= 1.0, (
         f"min_occupation_coverage must be in (0, 1], got {min_occupation_coverage}"
     )
-    assert alex_path.exists(), f"Alex exposure file not found: {alex_path}"
-    df = pd.read_excel(alex_path)
+    assert simulation_based_path.exists(), f"Simulation-based exposure file not found: {simulation_based_path}"
+    df = pd.read_excel(simulation_based_path)
     required_cols = {
         TASK_DESC_COL,
         OCC_DESC_COL,
@@ -167,14 +167,14 @@ def load_alex_exposure_mapped_to_ratings(
         PREDICTION_SUCCESS_COL,
     }
     assert required_cols.issubset(df.columns), (
-        f"Alex exposure file missing columns: {required_cols - set(df.columns)}"
+        f"Simulation-based exposure file missing columns: {required_cols - set(df.columns)}"
     )
 
     ratings_lookup = _build_ratings_lookup(ratings_path)
     ratings_task_counts = _build_ratings_task_counts(ratings_path)
     task_type_lookup = _load_task_type_lookup(statements_path)
 
-    occ_to_alex_tasks = {}
+    occ_to_simulation_based_tasks = {}
     mapped_rows = []
     for _, row in df.iterrows():
         occ_desc = row[OCC_DESC_COL]
@@ -183,9 +183,9 @@ def load_alex_exposure_mapped_to_ratings(
             continue
         occ_stripped = str(occ_desc).strip()
         task_stripped = str(task_desc).strip()
-        if occ_stripped not in occ_to_alex_tasks:
-            occ_to_alex_tasks[occ_stripped] = set()
-        occ_to_alex_tasks[occ_stripped].add(task_stripped)
+        if occ_stripped not in occ_to_simulation_based_tasks:
+            occ_to_simulation_based_tasks[occ_stripped] = set()
+        occ_to_simulation_based_tasks[occ_stripped].add(task_stripped)
         key = (occ_stripped, task_stripped)
         if key not in ratings_lookup:
             continue
@@ -197,9 +197,9 @@ def load_alex_exposure_mapped_to_ratings(
         if has_usable_score:
             score = float(row[EXPOSURE_COL])
             assert np.isfinite(score), f"Exposure value must be finite, got {row[EXPOSURE_COL]!r}"
-            assert 0.0 <= score <= 1.0, f"Expected Alex exposure score in [0, 1], got {score}"
+            assert 0.0 <= score <= 1.0, f"Expected Simulation-based exposure score in [0, 1], got {score}"
         mapped_rows.append({
-            "AlexOccupationTitle": occ_stripped,
+            "SimulationBasedOccupationTitle": occ_stripped,
             "ONETSOCCode": onet_soc_code,
             "TaskID": task_id,
             "auto_hl_bi": pd.NA if pd.isna(score) else int(score >= exposure_threshold),
@@ -208,16 +208,16 @@ def load_alex_exposure_mapped_to_ratings(
         })
 
     n_occupations_not_all_tasks_in_ratings = 0
-    for occ_stripped, task_set in occ_to_alex_tasks.items():
+    for occ_stripped, task_set in occ_to_simulation_based_tasks.items():
         if any((occ_stripped, task) not in ratings_lookup for task in task_set):
             n_occupations_not_all_tasks_in_ratings += 1
     print(
-        f"[Alex exposure] Occupations with at least one Alex task not in Task Ratings "
+        f"[Simulation-based exposure] Occupations with at least one Simulation-based task not in Task Ratings "
         f"(not all tasks covered): {n_occupations_not_all_tasks_in_ratings}"
     )
 
     mapped = pd.DataFrame(mapped_rows)
-    assert len(mapped) > 0, "No rows mapped from Alex file to Task Ratings + Task Statements."
+    assert len(mapped) > 0, "No rows mapped from Simulation-based file to Task Ratings + Task Statements."
 
     task_coverage = mapped.groupby(["ONETSOCCode", "TaskID"], as_index=False).agg(
         has_filled_exposure_score=(EXPOSURE_COL, lambda s: bool(s.notna().any())),
@@ -235,7 +235,7 @@ def load_alex_exposure_mapped_to_ratings(
         ].astype(str)
     )
     print(
-        "[Alex exposure] Occupations excluded for < "
+        "[Simulation-based exposure] Occupations excluded for < "
         f"{min_occupation_coverage:.0%} task exposure-score coverage: {len(excluded_occupations)}"
     )
 
@@ -243,7 +243,7 @@ def load_alex_exposure_mapped_to_ratings(
         (~mapped["ONETSOCCode"].astype(str).isin(excluded_occupations))
         & mapped[EXPOSURE_COL].notna()
     ].copy()
-    assert len(data) > 0, "No Alex exposure rows remain after success and occupation coverage filters."
+    assert len(data) > 0, "No Simulation-based exposure rows remain after success and occupation coverage filters."
     data = data.drop_duplicates(subset=["ONETSOCCode", "TaskID"], keep="first")
     return (
         data[["ONETSOCCode", "TaskID", "auto_hl_bi", "TaskType", EXPOSURE_COL]],
@@ -251,25 +251,25 @@ def load_alex_exposure_mapped_to_ratings(
     )
 
 
-def load_alex_labels(alex_exposure_threshold=0.5):
+def load_simulation_based_labels(simulation_based_exposure_threshold=0.5):
     """
-    Load binary Alex task-level labels mapped to O*NET IDs.
+    Load binary Simulation-based task-level labels mapped to O*NET IDs.
 
-    Assumes the shared Alex loader's filtering rules are the correct source of
+    Assumes the shared Simulation-based loader's filtering rules are the correct source of
     truth for valid exposure scores.
     """
-    alex_df, _ = load_alex_exposure_mapped_to_ratings(
-        ALEX_EXPOSURE_PATH,
+    simulation_based_df, _ = load_simulation_based_exposure_mapped_to_ratings(
+        SIMULATION_BASED_EXPOSURE_PATH,
         TASK_RATINGS_PATH,
         TASK_STATEMENTS_PATH,
-        exposure_threshold=alex_exposure_threshold,
+        exposure_threshold=simulation_based_exposure_threshold,
     )
-    alex_df = alex_df[["ONETSOCCode", "TaskID", "auto_hl_bi", EXPOSURE_COL]].dropna(
+    simulation_based_df = simulation_based_df[["ONETSOCCode", "TaskID", "auto_hl_bi", EXPOSURE_COL]].dropna(
         subset=["ONETSOCCode", "TaskID", "auto_hl_bi"]
     ).copy()
-    alex_df["ONETSOCCode"] = alex_df["ONETSOCCode"].astype(str)
-    alex_df["TaskID"] = alex_df["TaskID"].astype(float)
-    alex_df["auto_hl_bi"] = alex_df["auto_hl_bi"].astype(int)
-    unique_labels = set(alex_df["auto_hl_bi"].unique().tolist())
-    assert unique_labels.issubset({0, 1}), f"Expected binary auto_hl_bi for Alex, got {unique_labels}"
-    return alex_df
+    simulation_based_df["ONETSOCCode"] = simulation_based_df["ONETSOCCode"].astype(str)
+    simulation_based_df["TaskID"] = simulation_based_df["TaskID"].astype(float)
+    simulation_based_df["auto_hl_bi"] = simulation_based_df["auto_hl_bi"].astype(int)
+    unique_labels = set(simulation_based_df["auto_hl_bi"].unique().tolist())
+    assert unique_labels.issubset({0, 1}), f"Expected binary auto_hl_bi for Simulation-based, got {unique_labels}"
+    return simulation_based_df

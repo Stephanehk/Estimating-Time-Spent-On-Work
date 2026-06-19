@@ -52,13 +52,13 @@ def _load_task_ratings():
     full-occupation runs fast. The returned DataFrame is never mutated by callers
     (they only filter it), so sharing one cached copy is safe and output-identical.
     """
-    return pd.read_excel(os.path.join('data', 'Task Ratings.xlsx'))
+    return pd.read_excel(os.path.join('data', 'onet_data', 'Task Ratings.xlsx'))
 
 
 @lru_cache(maxsize=1)
 def _load_task_statements():
     """Cached read of the (static) O*NET Task Statements workbook."""
-    return pd.read_excel(os.path.join('data', 'Task Statements.xlsx'))
+    return pd.read_excel(os.path.join('data', 'onet_data', 'Task Statements.xlsx'))
 from utils.constants import (
     FREQ_TO_TIME_PER_DAY,
     HOURS_PER_DAY,
@@ -72,7 +72,7 @@ from utils.llm_utils import DEFAULT_MODEL
 def get_onet_task_data(onet_soc_code, return_statements=False):
     """
     Extract task frequency, importance, and relevance ratings for an O*NET-SOC code
-    from `data/Task Ratings.xlsx` (O*NET version 30.2).
+    from `data/onet_data/Task Ratings.xlsx` (O*NET version 30.2).
 
     Returns a dict {"O*NET-SOC Code", "Title", "Tasks": [...]} where each task carries
     its raw frequency distribution (Scale ID FT), importance (IM), and relevance (RT).
