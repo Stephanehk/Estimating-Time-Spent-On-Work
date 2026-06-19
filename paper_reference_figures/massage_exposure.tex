@@ -1,0 +1,70 @@
+% ---------------------------------------------------------------------------
+% Massage Therapists: one task list -> two exposure verdicts.
+% Requires in preamble:
+%   \usepackage{tikz}
+%   \usepackage{colortbl}            % \rowcolor
+%   \usetikzlibrary{calc,arrows.meta}
+% (xcolor is pulled in by tikz; colortbl adds row shading.)
+% ---------------------------------------------------------------------------
+\definecolor{exposed}{HTML}{C44536}    % H&L-exposed (moderate+high)
+\definecolor{exposedbg}{HTML}{F6E0DB}  % highlight for exposed task rows
+\definecolor{timecol}{HTML}{2F5D62}    % our time-weighted verdict
+
+\newcommand{\exrow}[2]{\rowcolor{exposedbg}\textbf{#1} & \textbf{#2}\\}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    every node/.style={font=\footnotesize},
+    resultbox/.style={draw, line width=0.9pt, rounded corners=3pt,
+                      align=center, inner sep=7pt, minimum width=2.9cm},
+    flow/.style={-{Latex[length=2.4mm]}, line width=1pt},
+  ]
+
+  % --- the task list (highlighted = exposed by H&L) ----------------------
+  \node[draw=black!55, rounded corners=3pt, inner sep=5pt, fill=white] (tasks) {%
+    \setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.15}%
+    \begin{tabular}{@{}p{6.1cm}r@{}}
+      \textbf{Massage Therapist tasks} & {\scriptsize\color{black!60}share of working time}\\[3pt]
+      Massage \& knead muscles / soft tissue        & 45.1\%\\
+      Apply finger \& hand pressure                 & 12.4\%\\
+      Treat clients on-site / travel to them        & 12.1\%\\
+      Assess soft-tissue condition \& range of motion & 4.7\%\\
+      \exrow{Develop client treatment plans}{3.9\%}
+      \exrow{Maintain treatment records}{3.9\%}
+      \exrow{Confer with clients on medical history}{3.8\%}
+      \exrow{Provide postural / stretching guidance}{3.7\%}
+      Maintain massage areas (restock / sanitize)   & 3.4\%\\
+      Perform other adjunctive therapies            & 3.3\%\\
+      Prepare \& blend oils, apply to skin           & 1.9\%\\
+      Use complementary aids (lamps, compresses)    & 1.2\%\\
+      \exrow{Refer clients to other therapists}{0.4\%}
+      \exrow{Consult other health professionals}{0.1\%}
+    \end{tabular}};
+
+  % --- the two verdicts --------------------------------------------------
+  \node[resultbox, draw=exposed, anchor=west]
+    (hl) at ($(tasks.east)+(3.3cm,1.55cm)$)
+    {\textcolor{exposed}{\textbf{\fontsize{20}{20}\selectfont 44\%}}\\[3pt]
+     of tasks are exposed,\\ weighted by core/\\supplemental classification};
+  \node[resultbox, draw=timecol, anchor=west]
+    (tw) at ($(tasks.east)+(3.3cm,-1.55cm)$)
+    {\textcolor{timecol}{\textbf{\fontsize{20}{20}\selectfont 16\%}}\\[3pt]
+     of working time exposed};
+
+  % --- arrows: same tasks, two weightings --------------------------------
+  \coordinate (src) at (tasks.east);
+  \draw[flow, exposed] (src) to[out=20,in=180] (hl.west);
+  \draw[flow, timecol] (src) to[out=-20,in=180] (tw.west);
+
+\end{tikzpicture}
+
+\caption{\textbf{Same tasks, opposite verdicts for Massage Therapists.} The
+Hatzius--Eloundou (H\&L) measure flags six tasks as exposed to language models
+(highlighted). Counting tasks under O*NET core/supplemental weighting, these are
+$44\%$ of the occupation. But each fills only a sliver of the workday: weighting
+the identical exposure labels by our estimated time-per-task, the exposed share
+falls to $16\%$, while the dominant in-person manual tasks remain unexposed ---
+moving Massage Therapists out of the highly-exposed category.}
+\label{fig:massage-exposure}
+\end{figure}

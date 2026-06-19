@@ -1,0 +1,12 @@
+# Tested with Python 3.12 and the following versions (the LP solve and all reported
+# numbers were verified byte-for-byte against the paper under these).
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.15.3
+matplotlib>=3.7
+openpyxl>=3.1   # read/write the O*NET .xlsx workbooks and the per-task export
+
+# Only needed to RE-COMPUTE the LLM pairwise rankings from scratch (not needed to
+# reproduce any paper figure/number, since the rankings are shipped in
+# data/generated_data/). Recompute also requires the env var OPENAI_API_KEY.
+# The OpenAI call is hand-rolled over urllib, so no SDK package is required.
