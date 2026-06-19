@@ -30,7 +30,7 @@ All commands below are run **from the repository root**.
 | **Table 2** (human-study agreement) | `python3 validation/user_study_analysis/table2_human_ranking_agreement.py --loop_all_socs` | Kendall τ (LP vs agg.) = 0.66 / 0.58 / 0.61 / 0.57 / 0.50; mean τ (agg. vs indiv.) = 0.50 / 0.67 / 0.65 / 0.56 / 0.46 |
 | **Table 3** (top-25 set changes) | `python3 -m analysis.table3_top25_exposure_changes` | 11 of 25 occupations swap out |
 | **Time-share correlations** (§Analysis: Tamkin–McCrory time + O*NET descriptors) | `python3 -m analysis.time_share_correlations --use_cps_constants --use_chosen_codes --extra_details gpt-5.2_ONET_30.2_use_cps_constants_prob_thresh=0.7 --use_max_span_time_weights` | importance τ, importance×freq τ, frequency τ, time spearman |
-| **Feasible-set size** (§Validation, ℓ2 = 1.50) | `python3 validation/feasible_set_solution_spread.py --use_chosen_codes --extra_details gpt-5.2_ONET_30.2_use_cps_constants_prob_thresh=0.7` | mean biggest ℓ2 difference ≈ 1.50 |
+| **Feasible-set size** (§Validation, ℓ2 = 1.50) | `python3 validation/feasible_set_solution_spread.py --use_chosen_codes --extra_details gpt-5.2_ONET_30.2_use_cps_constants_prob_thresh=0.7` | mean biggest ℓ2 difference ≈ 1.50 — **very slow** (~1.8M LP solves over 879 occupations; runs for days). Stochastic: it samples 1,000 random directions per occupation, so the aggregate (mean 1.50) is reproduced only approximately. |
 | **Per-task estimate export** (xlsx) | `python3 -m data_formatting.export_per_task_estimates` | rewrites `data/analysis_results/current_per_task_estimates.xlsx` |
 
 `plots/` Figure 4 = `fraction_occupations_at_or_above_fraction_tasks_exposed_alex_vs_hosseini[_moderate_exposure].png`;
