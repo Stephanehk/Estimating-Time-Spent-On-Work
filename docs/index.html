@@ -32,7 +32,7 @@
   <div class="wrap">
     <h1>Estimating Time Spent on Work Tasks</h1>
     <p class="authors">
-      <b>Stephane Hatgis-Kessell</b><sup>1</sup>&nbsp;&nbsp;
+      Stephane Hatgis-Kessell<sup>1</sup>&nbsp;&nbsp;
       Tomás Aguirre<sup>2</sup>&nbsp;&nbsp;
       Alexander Wan<sup>1</sup>&nbsp;&nbsp;
       Rishi Bommasani<sup>1</sup>
@@ -107,7 +107,7 @@
         <div class="bars" id="f1Bars" style="margin-top:12px;"></div>
       </div>
       <div class="figure-cap" id="f1Caption">
-        <b>Figure 1.</b> Constituent tasks for <span id="f1Title">Massage Therapists</span> from O*NET. Bar length shows our estimated share of working time per task; tasks measured as exposed to AI are highlighted in red. Under the core/supplemental weighting of Eloundou et al. [2024], <b>44%</b> of this occupation's tasks are exposed — yet we estimate these tasks occupy only <b>16%</b> of working time.
+        Figure 1. Constituent tasks for <span id="f1Title">Massage Therapists</span> from O*NET. Bar length shows our estimated share of working time per task; tasks measured as exposed to AI are highlighted in red. Under the core/supplemental weighting of Eloundou et al. [2024], 44% of this occupation's tasks are exposed — yet we estimate these tasks occupy only 16% of working time.
       </div>
     </div>
   </div>
@@ -164,7 +164,7 @@
         <img class="method-img" src="assets/figure2_method.png" alt="Method overview: O*NET occupation–task data feeds expected task frequency and LM pairwise comparisons; Copeland aggregation yields a ranking; a linear program produces per-instance time w(t,o); multiplied by expected frequency to give the time share s(t,o)." />
       </div>
       <div class="figure-cap">
-        <b>Figure 2.</b> Overview of our method. We first compute each task's expected daily frequency: O*NET frequency bins are converted into task instances per day, adjusted using CPS data where available, then averaged across respondents. Next, we prompt an LM to rank tasks by which takes longer to complete a single instance. The two outputs generate the constraints for a linear program which, when solved, produces per-instance time weights; combined with the task's expected frequency, they yield our estimate for the share of time spent on the task.
+        Figure 2. Overview of our method. We first compute each task's expected daily frequency: O*NET frequency bins are converted into task instances per day, adjusted using CPS data where available, then averaged across respondents. Next, we prompt an LM to rank tasks by which takes longer to complete a single instance. The two outputs generate the constraints for a linear program which, when solved, produces per-instance time weights; combined with the task's expected frequency, they yield our estimate for the share of time spent on the task.
       </div>
     </div>
   </div>
@@ -285,7 +285,7 @@
         <div class="chart-host" id="f4Chart" style="position:relative;"></div>
       </div>
       <div class="figure-cap">
-        <b>Figure 4.</b> Fraction of occupations at or above a given fraction of tasks exposed to LMs, under rubric-based [Eloundou et al., 2024] and simulation-based [Wan et al., 2026] exposure measures, across 858 occupations. Each curve compares weighting tasks by our time-share estimates <em>s(t, o)</em> against the core/supplemental weighting of Eloundou et al. [2024]. The moderate panel labels a task exposed at a &gt;25% time-saved threshold; the high panel at &gt;50%.
+        Figure 4. Fraction of occupations at or above a given fraction of tasks exposed to LMs, under rubric-based [Eloundou et al., 2024] and simulation-based [Wan et al., 2026] exposure measures, across 858 occupations. Each curve compares weighting tasks by our time-share estimates <em>s(t, o)</em> against the core/supplemental weighting of Eloundou et al. [2024]. The moderate panel labels a task exposed at a &gt;25% time-saved threshold; the high panel at &gt;50%.
       </div>
     </div>
   </div>
