@@ -33,7 +33,7 @@ function f1Render() {
   document.getElementById("f1TimeShare").textContent = fmtPct(shares.share_time);
 
   document.getElementById("f1Caption").innerHTML =
-    `Figure 1. Constituent tasks for ${occ.title} from O*NET. ` +
+    `<b>Figure 1.</b> Constituent tasks for ${occ.title} from O*NET. ` +
     `Bar length shows our estimated share of working time per task; tasks measured as exposed to AI under ` +
     `the rubric-based measure of Eloundou et al. [2024] are highlighted in red. Under that scheme, ` +
     `${fmtPct(shares.share_tasks)} of this occupation's tasks are exposed — yet we estimate these ` +
