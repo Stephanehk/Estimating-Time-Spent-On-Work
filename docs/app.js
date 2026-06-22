@@ -35,9 +35,7 @@ function f1Render() {
   document.getElementById("f1Caption").innerHTML =
     `<b>Figure 1.</b> Constituent tasks for ${occ.title} from O*NET. ` +
     `Bar length shows our estimated share of working time per task; tasks measured as exposed to AI under ` +
-    `the rubric-based measure of Eloundou et al. [2024] are highlighted in red. Under that scheme, ` +
-    `${fmtPct(shares.share_tasks)} of this occupation's tasks are exposed — yet we estimate these ` +
-    `tasks occupy only ${fmtPct(shares.share_time)} of working time.`;
+    `the rubric-based measure of Eloundou et al. [2024] are highlighted in red.`;
 
   const host = document.getElementById("f1Bars");
   host.innerHTML = "";
@@ -54,53 +52,9 @@ function f1Render() {
   }
 }
 
-function f1SetupCombo() {
-  const input = document.getElementById("occInput");
-  const list = document.getElementById("occList");
-  const index = F1.data.index;
-  let hlIdx = -1;
-
-  function close() { list.hidden = true; hlIdx = -1; }
-  function open(items) {
-    list.innerHTML = "";
-    items.slice(0, 60).forEach((it) => {
-      const li = document.createElement("li");
-      li.innerHTML = `<span>${it.title}</span><span class="code">${it.code}</span>`;
-      li.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        F1.code = it.code;
-        input.value = it.title;
-        close();
-        f1Render();
-      });
-      list.appendChild(li);
-    });
-    list.hidden = items.length === 0;
-  }
-  function filter() {
-    const q = input.value.trim().toLowerCase();
-    if (!q) return open(index);
-    open(index.filter((it) => it.title.toLowerCase().includes(q) || it.code.includes(q)));
-  }
-  input.addEventListener("focus", filter);
-  input.addEventListener("input", filter);
-  input.addEventListener("keydown", (e) => {
-    const items = [...list.querySelectorAll("li")];
-    if (e.key === "ArrowDown") { e.preventDefault(); hlIdx = Math.min(hlIdx + 1, items.length - 1); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); hlIdx = Math.max(hlIdx - 1, 0); }
-    else if (e.key === "Enter" && hlIdx >= 0) { e.preventDefault(); items[hlIdx].dispatchEvent(new Event("mousedown")); return; }
-    else if (e.key === "Escape") { close(); return; }
-    items.forEach((it, i) => it.classList.toggle("hl", i === hlIdx));
-    if (hlIdx >= 0) items[hlIdx].scrollIntoView({ block: "nearest" });
-  });
-  input.addEventListener("blur", () => setTimeout(close, 120));
-}
-
 async function initFigure1() {
   F1.data = await loadJSON("data/occupations.json");
   F1.code = F1.data.default;
-  document.getElementById("occInput").value = F1.data.occupations[F1.code].title;
-  f1SetupCombo();
   f1Render();
 }
 

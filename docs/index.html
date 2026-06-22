@@ -32,10 +32,10 @@
   <div class="wrap">
     <h1>Estimating Time Spent on Work Tasks</h1>
     <p class="authors">
-      Stephane Hatgis-Kessell<sup>1</sup>&nbsp;&nbsp;
-      Tomás Aguirre<sup>2</sup>&nbsp;&nbsp;
-      Alexander Wan<sup>1</sup>&nbsp;&nbsp;
-      Rishi Bommasani<sup>1</sup>
+      <a href="https://stephanehk.github.io/" target="_blank" rel="noopener">Stephane Hatgis-Kessell</a><sup>1</sup>&nbsp;&nbsp;
+      <a href="https://t6aguirre.github.io/" target="_blank" rel="noopener">Tomás Aguirre</a><sup>2</sup>&nbsp;&nbsp;
+      <a href="https://wanalex.com/" target="_blank" rel="noopener">Alexander Wan</a><sup>1</sup>&nbsp;&nbsp;
+      <a href="https://rishibommasani.github.io/" target="_blank" rel="noopener">Rishi Bommasani</a><sup>1</sup>
     </p>
     <p class="affil"><sup>1</sup>Stanford University&nbsp;&nbsp;·&nbsp;&nbsp;<sup>2</sup>University of São Paulo</p>
     <div class="cta">
@@ -53,14 +53,15 @@
       </a>
       <a class="btn" href="https://github.com/Stephanehk/Estimating-Time-Spent-On-Work/raw/main/task_time_share_estimates.xlsx" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
-        Download Weights
+        Download task time estimates
       </a>
     </div>
 
     <div class="abstract">
       <h3>Abstract</h3>
-      <p>The task-based framework in economics models occupations as bundles of tasks. It is the standard lens for understanding how technology affects work: a new technology changes the cost or time each task requires and these task-level effects aggregate to occupation-level effects. We study how tasks should be weighted in this aggregation. Prior work has relied on idiosyncratic or ill-justified choices for task weights. While recent work suggests weighting tasks by time spent, existing time shares are either based on coarse O*NET data not intended for this purpose and/or estimated via black-box language models.</p>
-      <p>We close this gap by proposing a principled method for estimating time shares for nearly 18,000 tasks that constitute nearly all U.S. occupations. Our estimate factors a task's time into (i) the expected frequency of the task, derived from O*NET, and (ii) the time to complete a single instance of it, estimated by solving a constraint satisfaction problem over pairwise comparisons elicited from language models. Applying our time shares to AI exposure, we find that accounting for the share of working <em>time</em> exposed — rather than the share of <em>tasks</em> — widens the gap between the least and most exposed occupations and reshuffles 11 of the 25 occupations widely reported as most exposed, shifting the top of the list away from clerical work and toward analytical roles.</p>
+      <p>Economics models occupations as bundles of tasks. This task-based framework is the standard lens for understanding how technology affects work: a new technology changes the cost or time each task requires, and these task-level effects aggregate to occupation-level effects. But this aggregation requires a choice of how to weight tasks, and prior work has relied on idiosyncratic or ill-justified weights. While recent work suggests weighting tasks by time spent, existing time shares are either based on coarse O*NET data not intended for this purpose or estimated via black-box language models.</p>
+      <p>We close this gap with a principled method for estimating time shares for nearly 18,000 tasks that constitute nearly all U.S. occupations. Our estimate factors a task's time into (i) the expected frequency of the task, derived from O*NET, and (ii) the time to complete a single instance of it, estimated by solving a constraint satisfaction problem over pairwise comparisons elicited from language models. Applying our time shares to AI exposure, we find that accounting for the share of working <em>time</em> exposed — rather than the share of <em>tasks</em> — widens the gap between the least and most exposed occupations and reshuffles 11 of the 25 occupations widely reported as most exposed in press and policy reports, shifting the top of the list away from clerical work and toward analytical roles.</p>
+      <p>We release our time share weights for O*NET 30.2, which can be used as a drop-in replacement for existing task weighting schemes.</p>
     </div>
   </div>
 </header>
@@ -72,22 +73,12 @@
       <div class="kicker">The Problem</div>
       <h2>Occupations are bundles of tasks — but how should tasks be weighted?</h2>
       <p class="lede">
-        The task-based framework is the standard lens for understanding how technology affects work, but computing occupation-level quantities requires an <strong>aggregation function</strong>, and there is no established consensus on how to weight tasks. A natural alternative is to weight tasks proportional to the <strong>time workers spend</strong> on each. Yet existing time shares are based on coarse O*NET data not intended for this purpose and/or estimated via black-box language models. We provide time-spent estimates for every occupation across all of its tasks — and they paint a different picture of which work is exposed to AI.
+        The task-based framework is the standard lens for understanding how technology affects work, but computing occupation-level quantities requires an <strong>aggregation function</strong>, and there is no established consensus on how to weight tasks. A natural alternative is to weight tasks proportional to the <strong>time workers spend</strong> on each. Yet existing time shares are based on coarse O*NET data not intended for this purpose and/or estimated via black-box language models.
       </p>
     </div>
 
     <div class="figure">
       <div class="figure-body">
-        <div class="controls">
-          <div class="control" style="flex:1 1 100%;">
-            <label for="occInput">Occupation (O*NET–SOC)</label>
-            <div class="combo">
-              <input id="occInput" type="text" autocomplete="off" placeholder="Search 876 occupations…" aria-controls="occList" />
-              <ul id="occList" class="combo-list" role="listbox" hidden></ul>
-            </div>
-          </div>
-        </div>
-
         <div class="stats">
           <div class="stat exposed">
             <div class="v" id="f1TaskShare">44%</div>
@@ -107,7 +98,7 @@
         <div class="bars" id="f1Bars" style="margin-top:12px;"></div>
       </div>
       <div class="figure-cap" id="f1Caption">
-        <b>Figure 1.</b> Constituent tasks for <span id="f1Title">Massage Therapists</span> from O*NET. Bar length shows our estimated share of working time per task; tasks measured as exposed to AI are highlighted in red. Under the core/supplemental weighting of Eloundou et al. [2024], 44% of this occupation's tasks are exposed — yet we estimate these tasks occupy only 16% of working time.
+        <b>Figure 1.</b> Constituent tasks for <span id="f1Title">Massage Therapists</span> from O*NET. Bar length shows our estimated share of working time per task; tasks measured as exposed to AI are highlighted in red.
       </div>
     </div>
   </div>
@@ -120,6 +111,7 @@
       <div class="kicker">Prior Work</div>
       <h2>Many works intend to weight by time — few actually do</h2>
       <p class="lede">
+        Time share is a sensible way to weight tasks when aggregating to the occupation level, but existing time-weights are based on heuristics that need not track time at all or unvalidated, black box language model estimates.<br>
         Our work builds on the task-based framework and can substitute for other approaches to task-to-occupation aggregation. While some prior works state the intent of using time share as the aggregation weights, they often do not in practice: most rely on O*NET metadata such as <strong>importance</strong> scores or the binary <strong>core/supplemental</strong> classification, which is related to time share but conceptually distinct. Table 1 surveys prior approaches and whether they are intended as proxies for time share.
       </p>
     </div>
@@ -130,16 +122,16 @@
           <tr><th>Method</th><th>Task weights</th><th class="num">Measures time share?</th></tr>
         </thead>
         <tbody>
-          <tr><td>Acemoglu and Autor [2011]</td><td>importance</td><td class="num"><span class="cross">✗</span></td></tr>
-          <tr><td>Brandes and Wattenhofer [2016]</td><td>frequency, mapped to time share via constrained LP</td><td class="num"><span class="check">✓</span></td></tr>
-          <tr><td>Brynjolfsson et al. [2018]</td><td>importance</td><td class="num"><span class="cross">✗</span></td></tr>
-          <tr><td>Webb [2020]</td><td>average of frequency, importance, and task relevance</td><td class="num"><span class="cross">✗</span></td></tr>
-          <tr><td>Felten et al. [2021]</td><td>importance × paper-specific measure</td><td class="num"><span class="cross">✗</span></td></tr>
-          <tr><td>Martin and Monahan [2022]</td><td>frequency × author-assigned time weights</td><td class="num"><span class="check">✓</span></td></tr>
-          <tr><td>Eloundou et al. [2024]</td><td>task type classification (core vs. supplemental)</td><td class="num"><span class="cross">✗</span></td></tr>
-          <tr><td>Tamkin and McCrory [2025]</td><td>generated by prompting an LLM</td><td class="num"><span class="check">✓</span></td></tr>
-          <tr><td>Bouquet and Sheffi [2026]</td><td>frequency, mapped to time and normalized per occupation</td><td class="num"><span class="check">✓</span></td></tr>
-          <tr><td>Hosseini Maasoum and Lichtinger [2026]</td><td>frequency × importance</td><td class="num"><span class="check">✓</span></td></tr>
+          <tr><td><a href="https://www.nber.org/papers/w16082" target="_blank" rel="noopener">Acemoglu and Autor [2011]</a></td><td>importance</td><td class="num"><span class="cross">✗</span></td></tr>
+          <tr><td><a href="https://arxiv.org/abs/1604.08823" target="_blank" rel="noopener">Brandes and Wattenhofer [2016]</a></td><td>frequency, mapped to time share via constrained LP</td><td class="num"><span class="check">✓</span></td></tr>
+          <tr><td><a href="https://www.aeaweb.org/articles?id=10.1257/pandp.20181019" target="_blank" rel="noopener">Brynjolfsson et al. [2018]</a></td><td>importance</td><td class="num"><span class="cross">✗</span></td></tr>
+          <tr><td><a href="https://www.michaelwebb.co/webb_ai.pdf" target="_blank" rel="noopener">Webb [2020]</a></td><td>average of frequency, importance, and task relevance</td><td class="num"><span class="cross">✗</span></td></tr>
+          <tr><td><a href="https://sms.onlinelibrary.wiley.com/doi/full/10.1002/smj.3286" target="_blank" rel="noopener">Felten et al. [2021]</a></td><td>importance × paper-specific measure</td><td class="num"><span class="cross">✗</span></td></tr>
+          <tr><td><a href="https://www.ons.gov.uk/economy/environmentalaccounts/articles/developingamethodformeasuringtimespentongreentasks/march2022" target="_blank" rel="noopener">Martin and Monahan [2022]</a></td><td>frequency × author-assigned time weights</td><td class="num"><span class="check">✓</span></td></tr>
+          <tr><td><a href="https://www.science.org/doi/10.1126/science.adj0998" target="_blank" rel="noopener">Eloundou et al. [2024]</a></td><td>task type classification (core vs. supplemental)</td><td class="num"><span class="cross">✗</span></td></tr>
+          <tr><td><a href="https://www.anthropic.com/research/anthropic-economic-index-september-2025-report" target="_blank" rel="noopener">Tamkin and McCrory [2025]</a></td><td>generated by prompting an LLM</td><td class="num"><span class="check">✓</span></td></tr>
+          <tr><td><a href="https://www.tandfonline.com/doi/full/10.1080/00207543.2026.2643477" target="_blank" rel="noopener">Bouquet and Sheffi [2026]</a></td><td>frequency, mapped to time and normalized per occupation</td><td class="num"><span class="check">✓</span></td></tr>
+          <tr><td><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5425555" target="_blank" rel="noopener">Hosseini Maasoum and Lichtinger [2026]</a></td><td>frequency × importance</td><td class="num"><span class="check">✓</span></td></tr>
           <tr class="ours-row"><td>Ours</td><td>satisfy constraints from frequency data and LM-labeled time rankings</td><td class="num"><span class="check">✓</span></td></tr>
         </tbody>
       </table>
@@ -155,7 +147,7 @@
       <div class="kicker">Our Method</div>
       <h2>Our Method Details</h2>
       <p class="lede">
-        We factorize each estimate into <strong>(i)</strong> the expected frequency of the task and <strong>(ii)</strong> the time per single instance of the task. Expected task frequency is computed from O*NET incumbent surveys and U.S. labor data. Because no public dataset reports single-instance durations, we prompt a language model to rank task pairs by which takes longer per instance, aggregate those judgments with the Copeland method, and solve a <strong>linear program</strong> grounded in those ordinal constraints plus a 7-hour daily-time budget. The time share is then <em>s(t, o) = w(t, o) · E[f(t, o)]</em>. The full pipeline is summarized in <strong>Figure 2</strong>.
+        We factorize each estimate into <strong>(i)</strong> the expected frequency of the task and <strong>(ii)</strong> the time per single instance of the task. Expected task frequency is computed from O*NET data and U.S. labor data. Because no public dataset reports single-instance durations, and we find that LMs do a poor job of directly outputting sensible estimates, we prompt a LM to rank task pairs by which task takes longer per instance under that assumption that an LM can produce a reasonable ranking. We then aggregate those judgments with the Copeland method, and solve a <strong>linear program</strong> grounded in those ordinal constraints plus a 7-hour daily-time budget. The time share is then <em>s(t, o) = w(t, o) · E[f(t, o)]</em>. The full pipeline is summarized in <strong>Figure 2</strong>.
       </p>
     </div>
 
@@ -177,14 +169,14 @@
       <div class="kicker">Validation</div>
       <h2>Validating our time share estimates</h2>
       <p class="lede">
-        Because our time shares are the byproduct of a multi-step method, we validate its three components: the size of the feasible set of the constraint problem, the LM-induced ranking of single-instance times, and the O*NET daily task frequencies. Across 879 occupations the <strong>feasible region is concentrated</strong> around our reported solution (the most different sampled weight vectors differ by an average of just 1.5 hours across all tasks, against a 7-hour day). And for full-time workers we recruit from five occupations — <strong>human resources managers, lawyers, secretaries and administrative assistants, software developers, and customer service representatives</strong> — our LP-implied ranking is <strong>positively correlated with the human-induced ranking</strong> (Kendall's τ from 0.50 to 0.66), agreeing with the human consensus about as well as a typical individual worker does.
+        We validate the three components of our method: the size of the feasible set of the constraint problem, the LM-induced ranking of single-instance times, and the expected O*NET daily task frequencies. Across 879 occupations the <strong>feasible region is concentrated</strong> around our reported solution (the most different sampled weight vectors differ by an average of just 1.5 hours across all tasks, against a 7-hour day). And for full-time workers we recruit from five occupations — <strong>human resources managers, lawyers, secretaries and administrative assistants, software developers, and customer service representatives</strong> — our LP-implied ranking is <strong>positively correlated with the human-induced ranking</strong> (Kendall's τ from 0.50 to 0.66), agreeing with the human consensus about as well as a typical individual worker does.
       </p>
     </div>
 
-    <div class="tbl-wrap" style="max-width:760px; margin-left:auto; margin-right:auto;">
-      <table class="data">
+    <div class="tbl-wrap" style="max-width:900px; margin-left:auto; margin-right:auto;">
+      <table class="data table2">
         <thead>
-          <tr><th>Occupation</th><th class="num">Number of subjects</th><th class="num">τ (LP vs. agg.)</th><th class="num">τ (agg. vs. indiv.) [frac. sig.]</th></tr>
+          <tr><th>Occupation</th><th class="num">Number of subjects</th><th class="num">Ranking corr. between LP&#8209;induced ranking and aggregate human ranking</th><th class="num">Mean ranking corr. between each human's ranking and aggregate human ranking <span style="white-space:nowrap">[frac. sig.]</span></th></tr>
         </thead>
         <tbody>
           <tr><td>Human resources managers</td><td class="num">10</td><td class="num">0.66**</td><td class="num">0.50 [0.60]</td></tr>
@@ -195,7 +187,7 @@
         </tbody>
       </table>
     </div>
-    <p class="note"><b>Table 2.</b> Agreement between our per-instance task rankings and human rankings. <code>τ (LP vs. agg.)</code> is Kendall's τ between the ranking implied by our linear program and the Copeland-aggregated human ranking. <code>τ (agg. vs. indiv.)</code> is the mean Kendall's τ between the aggregate human ranking and each individual worker's ranking; the bracketed <code>[frac. sig.]</code> value is the fraction of workers whose individual ranking is significantly correlated (p &lt; 0.05) with the aggregate. <code>* p &lt; 0.05, ** p &lt; 0.01.</code></p>
+    <p class="note"><b>Table 2.</b> Agreement between our per-instance task rankings and human rankings, measured by Kendall's τ. The <b>ranking correlation between the LP-induced ranking and the aggregate human ranking</b> compares the ranking implied by our linear program against the Copeland-aggregated human ranking. The <b>mean ranking correlation between each human's ranking and the aggregate human ranking</b> averages Kendall's τ between the aggregate ranking and each individual worker's ranking; the bracketed <code>[frac. sig.]</code> value is the fraction of workers whose individual ranking is significantly correlated (p &lt; 0.05) with the aggregate. <code>* p &lt; 0.05, ** p &lt; 0.01.</code></p>
   </div>
 </section>
 
@@ -206,7 +198,7 @@
       <div class="kicker">Accounting for Time Share</div>
       <h2>Time weights reshuffle the 25 most AI-exposed occupations</h2>
       <p class="lede">
-        Government, industry, and the public are intensely concerned with how AI will affect jobs, and the most-exposed-occupation lists from prior work are widely covered in press and policy reports <span class="cites">[Wall Street Journal, 2023; Euronews, 2023; Kan, 2023; Vice, 2023; Bastian, 2023; Business Today, 2023; B&amp;T Magazine, 2023; U.S. Senate Committee on Health, Education, Labor and Pensions, Minority Staff, 2025; Scavette et al., 2025; Gmyrek et al., 2024]</span>. Re-weighting tasks by time share substantially modifies this set: <strong>11 of the top 25 occupations swap out, 9 of them clerical or customer-service roles.</strong> Time weights de-emphasize transactional tasks — updating a record, processing a claim, answering an inquiry — because the overall time spent on them is limited, and elevate analytical occupations whose one or two exposed tasks (research, drafting, modeling) consume a lot of time.
+        Government, industry, and the public are intensely concerned with how AI will affect jobs, and the most-exposed-occupation lists from prior work are widely covered in press — by the <a href="https://www.wsj.com/articles/the-jobs-most-exposed-to-chatgpt-e7ceebf0" target="_blank" rel="noopener">Wall Street Journal</a>, <a href="https://www.euronews.com/next/2023/03/23/openai-says-80-of-workers-could-see-their-jobs-impacted-by-ai-these-are-the-jobs-most-affe" target="_blank" rel="noopener">Euronews</a>, <a href="https://medium.com/pcmag-access/openai-chatgpt-could-disrupt-19-of-us-jobs-da1eee2f8231" target="_blank" rel="noopener">PCMag</a>, <a href="https://www.vice.com/en/article/openai-research-says-80-of-us-workers-will-have-jobs-impacted-by-gpt/" target="_blank" rel="noopener">Vice</a>, <a href="https://the-decoder.com/openai-job-market-study-gpt-4/" target="_blank" rel="noopener">The Decoder</a>, <a href="https://www.businesstoday.in/technology/news/story/chatgpt-maker-sam-altman-reveals-the-one-kind-of-job-that-will-vanish-soon-375014-2023-03-27" target="_blank" rel="noopener">Business Today</a>, and <a href="https://www.bandt.com.au/openai-reckons-chatgpt-can-almost-definitely-make-you-redundant/" target="_blank" rel="noopener">B&amp;T Magazine</a> — and in policy reports from the <a href="https://www.sanders.senate.gov/wp-content/uploads/10.6.2025-The-Big-Tech-Oligarchs-War-Against-Workers.pdf" target="_blank" rel="noopener">U.S. Senate HELP Committee</a>, the <a href="https://www.philadelphiafed.org/-/media/FRBP/Assets/Community-Development/Reports/report-Oct2025-occupational-exposure-to-generative-ai-in-the-third-federal-reserve-district.pdf" target="_blank" rel="noopener">Philadelphia Fed</a>, and the <a href="https://sdgs.un.org/sites/default/files/2024-05/Gmyrek;%20Berg;%20Bescond_Generative%20AI%20and%20Jobs.pdf" target="_blank" rel="noopener">ILO</a>. Re-weighting tasks by time share substantially modifies this set: <strong>11 of the top 25 occupations swap out, 9 of them clerical or customer-service roles.</strong> Time weights de-emphasize transactional tasks — updating a record, processing a claim, answering an inquiry — because the overall time spent on them is limited, and elevate analytical occupations whose one or two exposed tasks (research, drafting, modeling) consume a lot of time.
       </p>
     </div>
 
@@ -265,8 +257,8 @@
           <div class="control">
             <label>Exposure threshold</label>
             <div class="seg" id="f4thresh">
-              <button data-t="0.25" class="active">Moderate&nbsp;(&gt;25% time saved)</button>
-              <button data-t="0.5">High&nbsp;(&gt;50% time saved)</button>
+              <button data-t="0.25" class="active">Moderate&nbsp;(&ge;25% time saved)</button>
+              <button data-t="0.5">High&nbsp;(&ge;50% time saved)</button>
             </div>
           </div>
           <div class="control">
@@ -285,7 +277,7 @@
         <div class="chart-host" id="f4Chart" style="position:relative;"></div>
       </div>
       <div class="figure-cap">
-        <b>Figure 4.</b> Fraction of occupations at or above a given fraction of tasks exposed to LMs, under rubric-based [Eloundou et al., 2024] and simulation-based [Wan et al., 2026] exposure measures, across 858 occupations. Each curve compares weighting tasks by our time-share estimates <em>s(t, o)</em> against the core/supplemental weighting of Eloundou et al. [2024]. The moderate panel labels a task exposed at a &gt;25% time-saved threshold; the high panel at &gt;50%.
+        <b>Figure 4.</b> Fraction of occupations at or above a given fraction of tasks exposed to LMs, under rubric-based [Eloundou et al., 2024] and simulation-based [Wan et al., 2026] exposure measures, across 858 occupations. Each curve compares weighting tasks by our time-share estimates <em>s(t, o)</em> against the core/supplemental weighting of Eloundou et al. [2024]. The moderate panel labels a task exposed at a &ge;25% time-saved threshold; the high panel at &ge;50%.
       </div>
     </div>
   </div>
